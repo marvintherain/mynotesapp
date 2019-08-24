@@ -12,7 +12,7 @@ use chrono::prelude::{Utc};
 
 use std::env;
 
-use self::models::{Note, NewNote};
+use self::models::{Note, NewNote, ChangeNote};
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
@@ -39,6 +39,25 @@ pub fn new_note<'a>(conn: &PgConnection, title: &'a str, body: Option<&'a str>) 
         .values(&new_note)
         .get_result(conn)
         .expect("Error saving new note")
+}
+
+pub fn mod_post<'a>(conn: &PgConnection, note_id: i32, title: Option<&'a str>, body: Option<&'a str>) -> Note {
+    use schema::notes;    
+    
+    let now = Utc::now().naive_utc();
+    
+    let modded_note = ChangeNote {
+        title: title,
+        body: body,
+        last_edit: now,
+    };
+
+    let target = notes::table.filter(notes::id.eq(note_id));
+
+    diesel::update(target)
+        .set(&modded_note)
+        .get_result(conn)
+        .expect("Error changing note")
 }
 
 #[cfg(test)]
