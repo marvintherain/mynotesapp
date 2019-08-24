@@ -1,0 +1,12 @@
+[package]
+name = "mynotesapp"
+version = "0.1.0"
+authors = ["marvintherain <marvintherain@github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.7"
+diesel = { version = "1.0.0", features = ["postgres", "chrono"] }
+dotenv = "0.9.0"
