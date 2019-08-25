@@ -1,6 +1,6 @@
 use super::schema::{notes};
 
-#[derive(Queryable, Identifiable, Debug)]
+#[derive(Queryable, Identifiable, Debug, Clone)]
 pub struct Note {
     pub id: i32,
     pub title: String,

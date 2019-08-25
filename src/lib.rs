@@ -60,6 +60,16 @@ pub fn mod_post<'a>(conn: &PgConnection, note_id: i32, title: Option<&'a str>, b
         .expect("Error changing note")
 }
 
+pub fn delete_note<'a>(conn: &PgConnection, note_id: i32) -> Note {
+    use schema::notes;
+
+    let filtered_note = notes::table.filter(notes::id.eq(note_id));
+
+    diesel::delete(filtered_note)
+        .get_result(conn)
+        .expect("Error deleting note")
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
