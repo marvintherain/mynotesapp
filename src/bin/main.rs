@@ -5,6 +5,8 @@ use self::mynotesapp::*;
 use self::models::*;
 use self::diesel::prelude::*;
 
+use std::io;
+
 use dialoguer::{theme::ColorfulTheme, Select, Editor};
 
 fn main() {
@@ -30,22 +32,30 @@ fn main() {
 
     match entry_selection {
         0 => {
-            println!("todo");
+            println!("enter title of new note");
+            let mut title = String::new();
+            io::stdin().read_line(&mut title).expect("line could not be read");
+            //remove the \n at the end of title
+            let title = &title[..title.len()-1];
+
+            if let Some(rv) = Editor::new()
+                .edit("Enter new note body here")
+                .unwrap() {
+                
+                let my_new_note = new_note(&connection, &title, Some(&rv));
+                    println!("note {} created!", my_new_note.title);
+                } else {
+                    println!("abort");
+                }
+
         },
         1 => {
-                use schema::notes;
-    
-                let my_notes = notes::table
-                .load::<Note>(&connection)
-                .expect("Error loading notes");
 
-                let mut ui_selections: Vec<String> = vec![];
+    
+                let my_notes = read_notes(&connection);
                 let my_copy = my_notes.clone();
-                for entry in my_notes {
-                    let entry_creation = entry.creation_date.format("%Y-%m-%d %H:%M:%S").to_string();
-                    let new_selection = String::from(entry.title + " " + &entry_creation);
-                    ui_selections.push(new_selection);
-                }
+
+                let ui_selections = reformat_notes_for_ui(my_notes);
                 
                 let edit_selection = Select::with_theme(&ColorfulTheme::default())
                     .with_prompt("select the note you want to edit\ntitle              creation date")
@@ -54,7 +64,10 @@ fn main() {
                     .interact()
                     .unwrap();
 
-                let original_post = &my_copy[edit_selection].body.as_ref().unwrap();
+                let original_post = &my_copy[edit_selection]
+                    .body
+                    .as_ref()
+                    .unwrap();
 
                 if let Some(rv) = Editor::new().edit(original_post).unwrap() {
                     let modded_note = mod_note(&connection, my_copy[edit_selection].id, None, Some(&rv));

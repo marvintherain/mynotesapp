@@ -23,6 +23,30 @@ pub fn establish_connection() -> PgConnection {
         .expect(&format!("Error connecting to {}", database_url))
 }
 
+pub fn read_notes(conn: &PgConnection) -> Vec<Note> {
+        use schema::notes;
+
+        notes::table
+                .load::<Note>(conn)
+                .expect("Error loading notes")
+}
+
+pub fn reformat_notes_for_ui(notes: Vec<Note>) -> Vec<String> {
+        let my_notes = notes;
+
+        let mut ui_selections: Vec<String> = vec![];
+        for entry in my_notes {
+                let entry_creation = entry
+                        .creation_date
+                        .format("%Y-%m-%d %H:%M:%S")
+                        .to_string();
+                let new_selection = String::from(entry.title + " " + &entry_creation);
+                ui_selections.push(new_selection);
+        };
+
+        return ui_selections        
+}
+
 pub fn new_note<'a>(conn: &PgConnection, title: &'a str, body: Option<&'a str>) -> Note {
     use schema::notes;
 
