@@ -41,7 +41,7 @@ pub fn new_note<'a>(conn: &PgConnection, title: &'a str, body: Option<&'a str>) 
         .expect("Error saving new note")
 }
 
-pub fn mod_post<'a>(conn: &PgConnection, note_id: i32, title: Option<&'a str>, body: Option<&'a str>) -> Note {
+pub fn mod_note<'a>(conn: &PgConnection, note_id: i32, title: Option<&'a str>, body: Option<&'a str>) -> Note {
     use schema::notes;    
     
     let now = Utc::now().naive_utc();
