@@ -7,18 +7,11 @@ use self::diesel::prelude::*;
 
 use std::io;
 
-use dialoguer::{theme::ColorfulTheme, Select, Editor};
+use dialoguer::{theme::ColorfulTheme, Select, Editor, Checkboxes};
 
 fn main() {
     let connection = establish_connection();
 
-    // let title = String::from("testtitle2");
-    // let body = Some("this is a test note2");
-
-    // let inserted = new_note(&connection, &title[..], body);
-
-    // println!("{:?}", inserted);
-//-------------------------------------------------
     let entry_selections = &[
         "create new note",
         "edit note",
@@ -32,6 +25,7 @@ fn main() {
 
     match entry_selection {
         0 => {
+            //create note
             println!("enter title of new note");
             let mut title = String::new();
             io::stdin().read_line(&mut title).expect("line could not be read");
@@ -50,8 +44,7 @@ fn main() {
 
         },
         1 => {
-
-    
+                //edit note
                 let my_notes = read_notes(&connection);
                 let my_copy = my_notes.clone();
 
@@ -78,18 +71,31 @@ fn main() {
 
         },
         2 => {
-            println!("todo");
+            //delete note
+            let my_notes = read_notes(&connection);
+            let my_copy = my_notes.clone();
+
+            let ui_selections = reformat_notes_for_ui(my_notes);
+            let ui_selections: Vec<&str> = ui_selections.iter().map(|x| &**x).collect();
+
+            let notes_to_delete = Checkboxes::with_theme(&ColorfulTheme::default())
+                .with_prompt("choose the notes to delete")
+                .items(&ui_selections[..])
+                .interact()
+                .unwrap();
+            
+            for i in notes_to_delete {
+                let deleted = delete_note(&connection, my_copy[i].id);
+                println!("deleted note {}", deleted.title);
+            }
+            
+            
+
         },
         _ => {
             println!("Error");
         }
     }
-
-  
-
-    // let deleted = delete_note(&connection, 2);
-
-    // println!("{:?}", deleted);
 
 
 }
